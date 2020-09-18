@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
   const secret = process.env.JWT_SECRET || 'is it secret, is it safe?';
 
   if (token) {
-    jwt.verify(token, secret, (err, decodedTOKEN) => {
+    jwt.verify(token, secret, (err, decodedToken) => {
       if (err) {
         res.status(401).json({ message: 'Not Allowed' })
       } else {

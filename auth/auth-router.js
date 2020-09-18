@@ -1,38 +1,47 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { nextTick } = require('process');
 const Users = require('../auth/auth-model')
 const router = require('express').Router();
 
-router.post('/register', (req, res) => {
+router.post('/register',async (req, res) => {
   // implement registration
   const credentials = req.body;
 
-  if (isValid(credentials)) {
+  const user = await Users.findUser(credentials.username)
+
+  if (user.length == 0) {
     const rounds = process.env.BCRYPT_ROUNDS || 8;
     const hash = bcrypt.hashSync(credentials.password, rounds);
 
     credentials.password = hash;
-
+    
     Users.addUser(credentials)
       .then(user => {
         const token = makeJwt(user);
         res.status(201).json({ data: user, token })
       })
       .catch(error => {
-        res.status(500).json({ message: error.message })
+        res.status(401).json({ message: error.message })
       })
   } else {
-    res.status(400).json({
+    // res.status(400).json({
+    //   message: 'Please provide username and password' 
+    // })
+    res.status(409).json({
       message: 'Please provide username and password' 
     })
   }
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   // implement login
   const { username, password } = req.body;
-
-  if (isValid(req.body)) {
+  const user = await Users.findUser(username)
+  if (!user) {res.status(400).json({
+      message: 'Please provide username and password'
+    })
+  } else {
     Users.findUser(username)
       .then(([user]) => {
         if  (user && bcrypt.compareSync(password, user.password)) {
@@ -45,10 +54,6 @@ router.post('/login', (req, res) => {
       .catch(error => {
         res.status(500).json({ message: error.message })
       })
-  } else {
-    res.status(400).json({
-      message: 'Please provide username and password'
-    })
   }
 });
 

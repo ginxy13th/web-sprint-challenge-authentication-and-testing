@@ -27,7 +27,7 @@ describe('register', () => {
     it("POST /register (new user)", async () => {
         const res = await supertest(server)
         .post('/api/auth/register')
-        .send({ username: '2345', password: 'password' })
+        .send({ username: '23456', password: 'password' })
         .then(res => {
             expect(res.status).toBe(201)
         })
@@ -62,8 +62,10 @@ describe('login', () => {
         expect(res.status).toBe(200)
     })
     it('Get /api/jokes (authorized)', async () => {
-        const res = await await supertest(server).get('/api/jokes/')
-        .set(token = `${token}`)
+        
+        const res = await supertest(server).get('/api/jokes/')
+        .set('Authorization', token)
         expect(res.status).toBe(200)
     })
 })
+//  = `${token}`

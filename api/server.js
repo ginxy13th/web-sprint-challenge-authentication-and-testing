@@ -9,10 +9,16 @@ const jokesRouter = require('../jokes/jokes-router.js');
 const server = express();
 
 server.use(helmet());
-server.use(cors());
 server.use(express.json());
+server.use(cors({
+    origin: "*",
+    creditentials: true
+}));
 
 server.use('/api/auth', authRouter);
 server.use('/api/jokes', authenticate, jokesRouter);
-
+server.use((err, req, res, next) => {
+	console.dir(err)
+	res.status(500).json({ errorMessage: 'Something went wrong' })
+})
 module.exports = server;
